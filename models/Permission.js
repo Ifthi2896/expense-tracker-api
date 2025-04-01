@@ -1,3 +1,6 @@
+
+//models/Permission.js
+
 const Roles = require("./Roles");
 
 class Permission {

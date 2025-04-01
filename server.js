@@ -6,6 +6,7 @@ const expenseRoutes = require("./routes/expenseRoutes");
 require("dotenv").config();
 const mongodbConnection = require("./db/mongodbExpense");
 const uploadRoutes = require("./routes/uploadRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
@@ -26,6 +27,7 @@ mongodbConnection(process.env.MONGO_URI);
 // Define routes
 app.use("/file", uploadRoutes);
 app.use("/expenses", expenseRoutes);
+app.use("/users", userRoutes);
 
 // Define a simple route
 app.get("/", (req, res) => {

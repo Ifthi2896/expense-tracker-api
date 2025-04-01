@@ -1,13 +1,16 @@
 // controllers/expenseController.js
 const mongoose = require("mongoose");
 const Expense = require("../models/Expense");
+const { createObjectCsvWriter } = require("csv-writer");
+const path = require("path");
+const fs = require("fs");
 
 exports.getExpenses = async (req, res) => {
   try {
     const expenses = await Expense.find();
     // Render the 'expenses' template and pass the expenses data to the view
     console.log(expenses);
-    res.render('expenses', { expenses });
+    res.render("expenses", { expenses });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -16,7 +19,7 @@ exports.getExpenses = async (req, res) => {
 exports.addExpenses = async (req, res) => {
   try {
     const expenses = new Expense(req.body);
-    console.log(expenses)
+    console.log(expenses);
     await expenses.save();
     res.json(expenses);
   } catch (error) {
@@ -71,6 +74,27 @@ exports.deleteExpenses = async (req, res) => {
       return res.status(404).json({ error: "Expense Not Found" });
     }
     res.json({ message: "Expense Delete Successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.filterExpenses = async (req, res) => {
+  try {
+    const { startDate, endDate, category } = req.query;
+    const query = {};
+    if (startDate && endDate) {
+      query.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+    if (category) {
+      query.category = category;
+    }
+    const filteredExpenses = await Expense.find(query);
+
+    res.json(filteredExpenses);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

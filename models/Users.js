@@ -1,38 +1,44 @@
-// Users.js
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+// models/User.js
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-// Define the user schema
+// User Schema
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true, // Ensure the user field is required
-    unique: true, // Ensure the user field is unique
-    trim: true, // Remove any leading/trailing whitespace
-    lowercase: true, // Automatically convert user to lowercase
-    minlength: [8, "Username must be at least 8 characters long."], // Example validation
-    maxlength: [20, "Username must be less than 10 characters long."], // Example validation
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true,
+    minlength: 8,
   },
   password: {
     type: String,
-    required: true, // Ensure password is required
-    minlength: [8, "Password must be at least 8 characters long."], // Example validation for password length
+    required: true,
+    minlength: 8,
   },
-  role: { type: String, required: true, trim: true, lowercase: true },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+  },
+  role: {
+    type: String,
+    required: true,
+    enum: ['user', 'admin', 'superadmin'], // Define roles here
+  },
 });
 
-// Pre-save hook to hash password and format username
-userSchema.pre("save", async function (next) {
-  if (this.isModified("username")) {
-    this.user = this.user.toLowerCase(); // Automatically lowercase the username
+// Hash the password before saving
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
   }
-
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 10); // Hash the password before saving
-  }
-
-  next(); // Continue with the save process
+  next();
 });
 
-// Create and export the model
-module.exports = mongoose.model("Expenses", userSchema, "users"); // Use 'User' instead of 'users' for consistency
+// Create model
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
